@@ -5,11 +5,13 @@ import numpy as np
 
 app = Flask(__name__)
 script_dir = os.path.dirname(__file__)
+data_dir = script_dir + "/Data"
+model_dir = script_dir + '/Model'
 
 
 # @ signifies a decorator- way to wrap a fun and modify it
 @app.route('/login', methods=['POST'])
-def index():
+def login():
     input_data = request.get_json()
     output_data = dict()
     try:
@@ -26,10 +28,10 @@ def index():
         data = pd.Series({"DeviceId": device_id,
                           "UserId": user_id})
         data = pd.DataFrame([data])
-        data.to_csv(script_dir + '/Data/LoginData.csv', index=False)
+        data.to_csv(data_dir + '/LoginData.csv', index=False)
         new_user = True
     else:
-        data = pd.read_csv(script_dir + '/Data/LoginData.csv')
+        data = pd.read_csv(data_dir + '/LoginData.csv')
         device_data = data[data["DeviceId"] == device_id]
         if len(device_data) == 0:
             data_len = len(data)
@@ -37,7 +39,7 @@ def index():
             user_id = "User" + "0" * (4 - len(tmp)) + tmp
             data = data.append(pd.Series({"DeviceId": device_id,
                                           "UserId": user_id}), ignore_index=True)
-            data.to_csv(script_dir + '/Data/LoginData.csv', index=False)
+            data.to_csv(data_dir + '/LoginData.csv', index=False)
             new_user = True
         else:
             user_id = device_data['UserId'][device_data.index[0]]
@@ -48,8 +50,29 @@ def index():
     return jsonify(output_data)
 
 
-# app.config['ALLOWED_EXTENSION'] = ['PNG', 'JPG', 'JPEG']
+@app.route('/lastDayDepressionState', methods=['POST'])
+def status():
+    input_data = request.get_json()
+    output_data = dict()
+    try:
+        user_id = input_data['UserId']
+        status_file = pd.read_csv(data_dir + '/StatusData.csv')
+    except KeyError:
+        output_data['status'] = "Failure. Data not found"
+        return jsonify(output_data)
+    except FileNotFoundError:
+        output_data['status'] = "Error. No records found."
+        return jsonify(output_data)
+    state_list = status_file[status_file["UserId"] == user_id]
+    if len(state_list) == 0:
+        state = "Error. No records found."
+    else:
+        state = state_list['State'][state_list.index[0]]
+    output_data["status"] = state
+    return jsonify(output_data)
 
+
+# app.config['ALLOWED_EXTENSION'] = ['PNG', 'JPG', 'JPEG']
 
 
 """
