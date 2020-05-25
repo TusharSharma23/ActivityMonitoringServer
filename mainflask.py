@@ -2,6 +2,7 @@ import os.path
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import numpy as np
+from scipy import stats
 
 app = Flask(__name__)
 script_dir = os.path.dirname(__file__)
