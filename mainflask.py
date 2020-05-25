@@ -3,11 +3,14 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import numpy as np
 from scipy import stats
+import pickle
+import sklearn
+from sklearn.ensemble import RandomForestClassifier
 
 app = Flask(__name__)
 script_dir = os.path.dirname(__file__)
 data_dir = script_dir + "/Data"
-model_dir = script_dir + '/Model'
+model_dir = script_dir + '/ModelData'
 
 
 # @ signifies a decorator- way to wrap a fun and modify it
@@ -72,6 +75,78 @@ def status():
     output_data["status"] = state
     return jsonify(output_data)
 
+
+@app.route('/lastWeekDepressionState', methods=['POST'])
+def patient_status():
+    input_data = request.get_json()
+    output_data = dict()
+    try:
+        user_id = input_data['UserId']
+    except KeyError:
+        output_data['status'] = "Failure. Data not found"
+        return jsonify(output_data)
+    dir_list = os.listdir(data_dir)
+    if dir_list.count(user_id) == 0:
+        output_data['status'] = "Error. No records found for this user"
+    else:
+        dir_list = os.listdir(data_dir + "/" + user_id)
+        if len(dir_list) < 5:
+            output_data['status'] = 'Error. Insufficient data.'
+        else:
+            working_dir = data_dir + "/" + user_id
+            files = os.listdir(working_dir)
+            data = pd.DataFrame()
+            for file in files:
+                df = pd.read_csv(working_dir + "/" + file)
+                data = data.append(df, ignore_index=True)
+            data = data.to_numpy()
+            output_data['status'] = get_patient_state(data, 'patientwise.sav')
+    return jsonify(output_data)
+
+
+def get_patient_state(data, model_name):
+    mean = np.mean(data)
+    std = np.std(data)
+    vari = np.var(data)
+    trimmed_mean = stats.trim_mean(data, 0.20)[0]
+    coff_of_variation = std / mean
+    inv_coff_of_variation = mean / std
+    kurtosys = stats.kurtosis(data)[0]
+    skewness = stats.skew(data)[0]
+    quantile1 = np.quantile(data, .01)
+    quantile5 = np.quantile(data, .05)
+    quantile25 = np.quantile(data, .25)
+    quantile75 = np.quantile(data, .75)
+    quantile95 = np.quantile(data, .95)
+    quantile99 = np.quantile(data, .99)
+
+    data = {'Mean': mean,
+            'Standard deviation': std,
+            'Variance': vari,
+            'Trimmed mean': trimmed_mean,
+            'Coefficient of variation': coff_of_variation,
+            'Inverse coefficient of variation': inv_coff_of_variation,
+            'Kurtosis': kurtosys,
+            'Skewness': skewness,
+            'Quantile 1%': quantile1,
+            'Quantile 5%': quantile5,
+            'Quantile 25%': quantile25,
+            'Quantile 75%': quantile75,
+            'Quantile 95%': quantile95,
+            'Quantile 99%': quantile99}
+
+    return fit_model(pd.DataFrame([data]), model_name)
+
+
+def fit_model(data, model_name):
+    model = pickle.load(open(model_dir + '/' + model_name, 'rb'))
+    test_data = []
+    test_data.extend(data.to_numpy())
+    prediction = model.predict(test_data)
+    if prediction[0][0] == 1:
+        return "Depressed"
+    else:
+        return "Not Depressed"
 
 # app.config['ALLOWED_EXTENSION'] = ['PNG', 'JPG', 'JPEG']
 
