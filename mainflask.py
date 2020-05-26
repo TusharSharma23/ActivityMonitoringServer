@@ -1,11 +1,15 @@
 import os.path
+import uuid
+
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import numpy as np
 from scipy import stats
 import pickle
-import sklearn
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.cluster import KMeans
+from collections import Counter
+
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 script_dir = os.path.dirname(__file__)
@@ -60,6 +64,9 @@ def status():
     output_data = dict()
     try:
         user_id = input_data['UserId']
+        if not check_valid_user(user_id):
+            output_data['status'] = "Failure. Invalid User."
+            return jsonify(output_data)
         status_file = pd.read_csv(data_dir + '/StatusData.csv')
     except KeyError:
         output_data['status'] = "Failure. Data not found"
@@ -82,6 +89,9 @@ def patient_status():
     output_data = dict()
     try:
         user_id = input_data['UserId']
+        if not check_valid_user(user_id):
+            output_data['status'] = "Failure. Invalid User."
+            return jsonify(output_data)
     except KeyError:
         output_data['status'] = "Failure. Data not found"
         return jsonify(output_data)
@@ -99,12 +109,36 @@ def patient_status():
             for file in files:
                 df = pd.read_csv(working_dir + "/" + file)
                 data = data.append(df, ignore_index=True)
+            del data['timestamp']
             data = data.to_numpy()
             output_data['status'] = get_patient_state(data, 'patientwise.sav')
     return jsonify(output_data)
 
 
-def get_patient_state(data, model_name):
+@app.route('/', methods=['POST'])
+def upload_activity():
+    user_id = request.form['UserId']
+    file = request.files.get('activity_file')
+    output_data = dict()
+    if not check_valid_user(user_id):
+        output_data['status'] = "Failure. Invalid User."
+        return jsonify(output_data)
+    df = pd.read_csv(file)
+    create_user_file(user_id, df, file.filename)
+    del df['timestamp']
+    data = df.to_numpy()
+    k_mean_model = KMeans(n_clusters=4, max_iter=500)
+    k_mean_model.fit(data)
+    labels = Counter(k_mean_model.labels_)
+    extra_params = {'No_to_mild_Activity': labels[0],
+                    'high_activity': labels[3]}
+    state = get_patient_state(data, 'daywise.sav', extra_params)
+    output_data['status'] = state
+    update_status_file(user_id, state)
+    return jsonify(output_data)
+
+
+def get_patient_state(data, model_name, extra_params=None):
     mean = np.mean(data)
     std = np.std(data)
     vari = np.var(data)
@@ -134,67 +168,87 @@ def get_patient_state(data, model_name):
             'Quantile 75%': quantile75,
             'Quantile 95%': quantile95,
             'Quantile 99%': quantile99}
-
+    if extra_params is not None:
+        data.update(extra_params)
     return fit_model(pd.DataFrame([data]), model_name)
 
 
 def fit_model(data, model_name):
-    model = pickle.load(open(model_dir + '/' + model_name, 'rb'))
+    file = open(model_dir + '/' + model_name, 'rb')
+    model = pickle.load(file)
     test_data = []
     test_data.extend(data.to_numpy())
     prediction = model.predict(test_data)
+    file.close()
     if prediction[0][0] == 1:
         return "Depressed"
     else:
         return "Not Depressed"
 
-# app.config['ALLOWED_EXTENSION'] = ['PNG', 'JPG', 'JPEG']
 
-
-"""
-def get_predicted_value(input_image):
-    directory = script_dir + '/ModelData/'
-    input_image = image.load_img(script_dir + '/static/' + input_image.filename)
-    input_image = input_image.resize((128, 128))
-    input_image = image.img_to_array(input_image)
-    input_image = input_image / 255
-    print(directory + 'Engine.h5')
-    modelML = load_model(directory + 'Engine.h5')
-    pred = modelML.predict(np.reshape(np.array(input_image), (1, 128, 128, 3)))
-    index = pred[0].argmax(axis=0)
-    print(pred)
-    print(index)
-    if index == 0:
-        return "Non Viable tumor"
-    elif index == 1:
-        return "Viable tumor"
+def check_valid_user(user_id):
+    dir_list = os.listdir()
+    if dir_list.count("Data") == 0:
+        return False
+    dir_list = os.listdir("Data")
+    if dir_list.count("LoginData.csv") == 0:
+        return False
     else:
-        return "Non tumor"
-
-
-@app.route('/result', methods=['POST'])
-def result():
-    warning = ''
-    typeOsteo = ''
-    pred = False
-    invalid = False
-    input_image = request.files["image"]
-    if input_image.filename != '':
-        print(input_image)
-        if not allowedImage(input_image.filename):
-            warning = "ALERT: The file must be an Image !"
-            print(warning)
-            invalid = True
-            #return redirect('http://localhost:5000')
+        data = pd.read_csv(data_dir + '/LoginData.csv')
+        device_data = data[data["UserId"] == user_id]
+        if len(device_data) == 0:
+            return False
         else:
-            input_image.save(script_dir + '/static/' + input_image.filename)
-            typeOsteo = get_predicted_value(input_image)
-            pred = True
+            return True
+
+
+def create_user_file(user_id, data_frame, file_name):
+    dir_list = os.listdir()
+    if dir_list.count("Data") == 0:
+        os.mkdir("Data")
+    dir_list = os.listdir("Data")
+    if dir_list.count(user_id) == 0:
+        os.mkdir(data_dir + "/" + user_id)
+        path = os.path.join(data_dir + "/" + user_id, file_name)
+        data_frame.to_csv(path, index=False)
     else:
-        warning = "ALERT: Please select an Image !"
-    img = input_image.filename
-    return render_template("homepage.html", img=img, typeOsteo=typeOsteo, pred=pred, warning=warning)
-"""
+        dir_list = os.listdir(data_dir + "/" + user_id)
+        if dir_list.count(file_name) > 0:
+            print("File already exists.")
+        else:
+            path = os.path.join(data_dir + "/" + user_id, file_name)
+            if len(dir_list) >= 15:
+                sorted_file_name = sorted(dir_list)
+                os.remove(os.path.join(data_dir + "/" + user_id, sorted_file_name[0]))
+                data_frame.to_csv(path, index=False)
+            else:
+                data_frame.to_csv(path, index=False)
+
+
+def update_status_file(user_id, state):
+    dir_list = os.listdir()
+    if dir_list.count("Data") == 0:
+        os.mkdir("Data")
+    dir_list = os.listdir("Data")
+    if dir_list.count("StatusData.csv") == 0:
+        data = {'UserId': user_id,
+                'State': state}
+        data = pd.DataFrame([data])
+        data.to_csv(data_dir + "/StatusData.csv", index=False)
+    else:
+        data = pd.read_csv(data_dir + "/StatusData.csv")
+        user_data = data[data['UserId'] == user_id]
+        if len(user_data) == 0:
+            data = data.append(pd.Series({"UserId": user_id,
+                                          "State": state}), ignore_index=True)
+            data.to_csv(data_dir + '/StatusData.csv', index=False)
+        else:
+            # data.drop(user_data.index[0], inplace=True)
+            # data = data.append(pd.Series({"UserId": user_id,
+            #                              "State": state}), ignore_index=True)
+            data.at[user_data.index[0], 'State'] = state
+            data.to_csv(data_dir + '/StatusData.csv', index=False)
+
 
 if __name__ == "__main__":
     app.run(debug=False, threaded=False)
