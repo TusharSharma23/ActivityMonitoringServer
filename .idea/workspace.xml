@@ -16,13 +16,8 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="659f671e-aec5-4939-8df5-a14583c2086b" name="Default" comment="lastWeekDepressionState endpoint ready.">
-      <change afterPath="$PROJECT_DIR$/Data/User0001/2003-03-20.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/UserInterface.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/UserInterface.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="659f671e-aec5-4939-8df5-a14583c2086b" name="Default" comment="uploadTodaysActivity endpoint ready. Endpoints complete.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data/LoginData.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Data/LoginData.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data/StatusData.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Data/StatusData.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mainflask.py" beforeDir="false" afterPath="$PROJECT_DIR$/mainflask.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -144,7 +139,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590436924578</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="uploadTodaysActivity endpoint ready. Endpoints complete.">
+      <created>1590508428215</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1590508428215</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -183,7 +185,8 @@
     <MESSAGE value="Status and login endpoints done." />
     <MESSAGE value="Interpreter added with project." />
     <MESSAGE value="lastWeekDepressionState endpoint ready." />
-    <option name="LAST_COMMIT_MESSAGE" value="lastWeekDepressionState endpoint ready." />
+    <MESSAGE value="uploadTodaysActivity endpoint ready. Endpoints complete." />
+    <option name="LAST_COMMIT_MESSAGE" value="uploadTodaysActivity endpoint ready. Endpoints complete." />
   </component>
   <component name="WindowStateProjectService">
     <state x="395" y="90" key="#Inspections" timestamp="1590432144515">
@@ -210,22 +213,22 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="548" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1590398323441" />
-    <state width="1515" height="208" key="GridCell.Tab.0.bottom" timestamp="1590508289340">
+    <state width="1515" height="208" key="GridCell.Tab.0.bottom" timestamp="1590510125796">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="208" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1590508289340" />
-    <state width="1515" height="208" key="GridCell.Tab.0.center" timestamp="1590508289340">
+    <state width="1515" height="208" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1590510125796" />
+    <state width="1515" height="208" key="GridCell.Tab.0.center" timestamp="1590510125795">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="208" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1590508289340" />
-    <state width="1515" height="208" key="GridCell.Tab.0.left" timestamp="1590508289340">
+    <state width="1515" height="208" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1590510125795" />
+    <state width="1515" height="208" key="GridCell.Tab.0.left" timestamp="1590510125795">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="208" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1590508289340" />
-    <state width="1515" height="208" key="GridCell.Tab.0.right" timestamp="1590508289340">
+    <state width="1515" height="208" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1590510125795" />
+    <state width="1515" height="208" key="GridCell.Tab.0.right" timestamp="1590510125796">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="208" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1590508289340" />
+    <state width="1515" height="208" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1590510125796" />
     <state width="1515" height="261" key="GridCell.Tab.1.bottom" timestamp="1590484289083">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -246,10 +249,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="277" y="57" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1590508389275" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1590461160809">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1590508576561">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1590461160809" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1590508576561" />
     <state x="333" y="141" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1590435029173">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -258,10 +261,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="468" y="201" key="git4idea.merge.GitPullDialog/0.0.1536.824@0.0.1536.824" timestamp="1590047462779" />
-    <state x="570" y="318" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1590431611620">
+    <state x="570" y="318" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1590508513208">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="570" y="318" key="git4idea.remote.GitConfigureRemotesDialog/0.0.1536.824@0.0.1536.824" timestamp="1590431611620" />
+    <state x="570" y="318" key="git4idea.remote.GitConfigureRemotesDialog/0.0.1536.824@0.0.1536.824" timestamp="1590508513208" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1590338194494">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
