@@ -1,7 +1,6 @@
 import os.path
-import uuid
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 import pandas as pd
 import numpy as np
 from scipy import stats
@@ -9,13 +8,14 @@ import pickle
 from sklearn.cluster import KMeans
 from collections import Counter
 
-from werkzeug.utils import secure_filename
-
 app = Flask(__name__)
 script_dir = os.path.dirname(__file__)
 data_dir = script_dir + "/Data"
 model_dir = script_dir + '/ModelData'
 
+@app.route('/')
+def hello_world():
+    return 'Hello'
 
 # @ signifies a decorator- way to wrap a fun and modify it
 @app.route('/login', methods=['POST'])
@@ -29,12 +29,12 @@ def login():
         output_data['status'] = "Failure. Data not found."
         print("Invalid Key.")
         return jsonify(output_data)
-    dir_list = os.listdir()
+    dir_list = os.listdir(script_dir)
     if dir_list.count("Data") == 0:
         print("Data directory missing")
-        os.mkdir("Data")
+        os.mkdir(data_dir)
         print("Created directory: " + data_dir)
-    dir_list = os.listdir("Data")
+    dir_list = os.listdir(data_dir)
     if dir_list.count("LoginData.csv") == 0:
         print("Login file missing")
         user_id = "User0001"
@@ -234,11 +234,11 @@ def fit_model(data, model_name):
 
 def check_valid_user(user_id):
     print("Checking user validity.")
-    dir_list = os.listdir()
+    dir_list = os.listdir(script_dir)
     if dir_list.count("Data") == 0:
         print("Data directory missing.")
         return False
-    dir_list = os.listdir("Data")
+    dir_list = os.listdir(data_dir)
     if dir_list.count("LoginData.csv") == 0:
         print("Login file missing.")
         return False
@@ -255,12 +255,12 @@ def check_valid_user(user_id):
 
 def create_user_file(user_id, data_frame, file_name):
     print("Storing user activity file.")
-    dir_list = os.listdir()
+    dir_list = os.listdir(script_dir)
     if dir_list.count("Data") == 0:
         print("Data directory missing.")
-        os.mkdir("Data")
+        os.mkdir(data_dir)
         print("Data directory Created.")
-    dir_list = os.listdir("Data")
+    dir_list = os.listdir(data_dir)
     if dir_list.count(user_id) == 0:
         print("User directory missing.")
         os.mkdir(data_dir + "/" + user_id)
@@ -288,12 +288,12 @@ def create_user_file(user_id, data_frame, file_name):
 
 def update_status_file(user_id, state):
     print("Storing predicted daily depression state.")
-    dir_list = os.listdir()
+    dir_list = os.listdir(script_dir)
     if dir_list.count("Data") == 0:
         print("Data directory missing.")
-        os.mkdir("Data")
+        os.mkdir(data_dir)
         print("Data directory created.")
-    dir_list = os.listdir("Data")
+    dir_list = os.listdir(data_dir)
     if dir_list.count("StatusData.csv") == 0:
         print("Status file missing.")
         data = {'UserId': user_id,
